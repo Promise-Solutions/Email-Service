@@ -20,6 +20,8 @@ public class SendEmailGateway implements SendEmailRepository {
     @Async("emailSenderTaskExecutor")
     @Override
     public void sendEmail(List<String> to, String subject, String body) {
+
+        // ======= Realiza o envio de emails paralelamente
         to.parallelStream()
             .forEach(employee -> CompletableFuture.runAsync(() -> {
                 try {
