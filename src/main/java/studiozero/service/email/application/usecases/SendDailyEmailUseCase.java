@@ -5,6 +5,8 @@ import studiozero.service.email.domain.dtos.Task;
 import studiozero.service.email.domain.repositories.SendEmailRepository;
 import studiozero.service.email.infrastructure.consumer.ConsumeEmailEventDto;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 public class SendDailyEmailUseCase {
@@ -16,8 +18,16 @@ public class SendDailyEmailUseCase {
     }
 
     public void execute(ConsumeEmailEventDto eventDto) {
-        List<SubJob> subJobsToday = eventDto.subJobs();
-        List<Task> tasksToday = eventDto.tasks();
+        if(eventDto == null) {
+            throw new IllegalArgumentException("Dados recebidos nulos");
+        }
+
+        if(eventDto.to() == null || eventDto.to().isEmpty()) {
+            throw new IllegalArgumentException("Lista de destinatários vazia ou nula");
+        }
+
+        List<SubJob> subJobsToday = eventDto.subJobs() != null ? eventDto.subJobs() : Collections.emptyList() ;
+        List<Task> tasksToday = eventDto.tasks() != null ? eventDto.tasks() : Collections.emptyList();
 
         StringBuilder content = new StringBuilder();
         content.append("Olá, aqui está suas tarefas e atendimentos do dia!.\n\n");
@@ -32,7 +42,9 @@ public class SendDailyEmailUseCase {
         if (!tasksToday.isEmpty()) {
             content.append("Tarefas para hoje:\n");
             for (Task t : tasksToday) {
-                content.append("- ").append(t.title()).append(" (Prazo: ").append(t.limitDate()).append(")\n");
+                content.append("- ").append(t.title()).append(" (Prazo: ").append(
+                        t.limitDate() != null ? t.limitDate() : "Sem prazo")
+                        .append(")\n");
             }
         }
 
