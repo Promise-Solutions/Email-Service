@@ -1,7 +1,7 @@
 package studiozero.service.email.domain.dtos;
 
-public record Subjob(
+public record SubJob(
         String clientName,
-        String jobTitle
+        String title
 ) {
 }
