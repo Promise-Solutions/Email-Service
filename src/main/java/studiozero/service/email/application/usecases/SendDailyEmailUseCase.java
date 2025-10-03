@@ -1,5 +1,7 @@
 package studiozero.service.email.application.usecases;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import studiozero.service.email.domain.dtos.SubJob;
 import studiozero.service.email.domain.dtos.Task;
 import studiozero.service.email.domain.repositories.SendEmailRepository;
@@ -10,8 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class SendDailyEmailUseCase {
-
-    private SendEmailRepository sendEmailRepository;
+    private final Logger log = LoggerFactory.getLogger(SendDailyEmailUseCase.class);
+    private final SendEmailRepository sendEmailRepository;
 
     public SendDailyEmailUseCase(SendEmailRepository sendEmailRepository) {
         this.sendEmailRepository = sendEmailRepository;
@@ -50,5 +52,6 @@ public class SendDailyEmailUseCase {
 
         String subject = "StudioZero: Você tem deveres para hoje!";
         sendEmailRepository.sendEmail(eventDto.to(), subject, content.toString());
+        log.info("Email diário enviado a funcionários");
     };
 }
