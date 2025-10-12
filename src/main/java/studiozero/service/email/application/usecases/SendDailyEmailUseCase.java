@@ -28,30 +28,37 @@ public class SendDailyEmailUseCase {
             throw new IllegalArgumentException("Lista de destinatários vazia ou nula");
         }
 
+        if (eventDto.subJobs().isEmpty() && eventDto.tasks().isEmpty()) {
+            log.info("Sem subserviços ou tarefas para hoje.");
+            String subjectNoDuties = "StudioZero: Sem deveres para hoje";
+            String contentNoDuties = "Não há atendimentos ou tarefas para hoje";
+            sendEmailRepository.sendEmail(eventDto.to(), subjectNoDuties, contentNoDuties);
+            log.info("Email diário enviado a funcionários");
+            return;
+        }
+
         List<SubJob> subJobsToday = eventDto.subJobs() != null ? eventDto.subJobs() : Collections.emptyList() ;
         List<Task> tasksToday = eventDto.tasks() != null ? eventDto.tasks() : Collections.emptyList();
 
         StringBuilder content = new StringBuilder();
         content.append("Olá, aqui está suas tarefas e atendimentos do dia!.\n\n");
-        if (!subJobsToday.isEmpty()) {
-            content.append("Atendimentos para hoje:\n");
-            for (SubJob sj : subJobsToday) {
-                String clientName = sj.clientName() != null ? sj.clientName() : "Não informado";
-                content.append("- ").append(sj.title()).append(" (Cliente: ").append(clientName).append(")\n");
-            }
-            content.append("\n");
+
+        content.append("Atendimentos para hoje:\n");
+        for (SubJob sj : subJobsToday) {
+            String clientName = sj.clientName() != null ? sj.clientName() : "Não informado";
+            content.append("- ").append(sj.title()).append(" (Cliente: ").append(clientName).append(")\n");
         }
-        if (!tasksToday.isEmpty()) {
-            content.append("Tarefas para hoje:\n");
-            for (Task t : tasksToday) {
-                content.append("- ").append(t.title()).append(" (Prazo: ").append(
-                        t.limitDate() != null ? t.limitDate() : "Sem prazo")
-                        .append(")\n");
-            }
+        content.append("\n");
+
+        content.append("Tarefas para hoje:\n");
+        for (Task t : tasksToday) {
+            content.append("- ").append(t.title()).append(" (Prazo: ").append(
+                    t.limitDate() != null ? t.limitDate() : "Sem prazo")
+                    .append(")\n");
         }
 
         String subject = "StudioZero: Você tem deveres para hoje!";
         sendEmailRepository.sendEmail(eventDto.to(), subject, content.toString());
         log.info("Email diário enviado a funcionários");
-    };
+    }
 }
