@@ -7,13 +7,14 @@ import studiozero.service.email.domain.dtos.Task;
 import studiozero.service.email.domain.repositories.SendEmailRepository;
 import studiozero.service.email.infrastructure.consumer.ConsumeEmailEventDto;
 
-import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
 public class SendDailyEmailUseCase {
     private final Logger log = LoggerFactory.getLogger(SendDailyEmailUseCase.class);
     private final SendEmailRepository sendEmailRepository;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public SendDailyEmailUseCase(SendEmailRepository sendEmailRepository) {
         this.sendEmailRepository = sendEmailRepository;
@@ -29,11 +30,11 @@ public class SendDailyEmailUseCase {
         }
 
         if (eventDto.subJobs().isEmpty() && eventDto.tasks().isEmpty()) {
-            log.info("Sem subserviços ou tarefas para hoje.");
+            log.info("📭 No tasks or subservices found for today");
             String subjectNoDuties = "StudioZero: Sem deveres para hoje";
             String contentNoDuties = "Não há atendimentos ou tarefas para hoje";
             sendEmailRepository.sendEmail(eventDto.to(), subjectNoDuties, contentNoDuties);
-            log.info("Email diário enviado a funcionários");
+            log.info("📧 Notification emails sent successfully to: {}", eventDto.to());
             return;
         }
 
@@ -52,13 +53,11 @@ public class SendDailyEmailUseCase {
 
         content.append("Tarefas para hoje:\n");
         for (Task t : tasksToday) {
-            content.append("- ").append(t.title()).append(" (Prazo: ").append(
-                    t.limitDate() != null ? t.limitDate() : "Sem prazo")
-                    .append(")\n");
+            content.append("- ").append(t.title())
+                    .append(" (Prazo: ").append(t.limitDate().format(dateFormatter)).append(")\n");
         }
 
         String subject = "StudioZero: Você tem deveres para hoje!";
         sendEmailRepository.sendEmail(eventDto.to(), subject, content.toString());
-        log.info("Email diário enviado a funcionários");
     }
 }

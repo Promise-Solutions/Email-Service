@@ -2,6 +2,7 @@ package studiozero.service.email.infrastructure.gateways;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -33,8 +34,11 @@ public class SendEmailGateway implements SendEmailRepository {
                     message.setSubject(subject);
                     message.setText(body);
                     mailSender.send(message);
+                    log.info("📧 Notification emails sent successfully to: {}", employee);
+                } catch (MailException e) {
+                    log.error("❌ Error trying to send emails to employees. Cause: {}", e.getMessage(), e);
                 } catch (Exception e) {
-                    log.error("Erro ao enviar email a {} ERRO: ", employee, e);
+                    log.error("❌ Unexpected error while executing scheduled email task: {}", e.getMessage(), e);
                 }
             }));
     }
